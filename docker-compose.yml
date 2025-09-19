@@ -1,0 +1,10 @@
+services:
+    redis-hrm:
+        image: redis:alpine
+        command: ["redis-server", "/data/redis.conf"]
+        volumes:
+            - ./redis_data_hrm:/data
+            - ./redis_hrm.conf:/data/redis.conf
+        ports:
+            - "127.0.0.1:6380:6379"
+        restart: unless-stopped

@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.DS_Store
+.env
+yarn-error.log
+ormconfig.json
+.idea
+.vscode
+dist
+.yarn
+.yarnrc.yml
+temp
+uploads
+.redis_hrm.conf
+.redis_data_hrm

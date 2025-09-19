@@ -1,0 +1,19 @@
+enum Status {
+    ACTIVE
+    INACTIVE
+}
+
+enum Gender {
+	ANY
+    MALE
+    FEMALE
+    RATHER_NOT_SAY
+}
+
+enum PaymentStatus {
+    PENDING
+    PENDING_PAYMENT
+    SUCCESS
+    FAILURE
+	REFUNDED
+}
