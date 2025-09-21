@@ -122,4 +122,5 @@ export class User extends BaseEntity {
     })
     @JoinColumn({ name: 'last_updated_by_id', referencedColumnName: 'id' })
     lastUpdatedBy!: User;
+
 }

@@ -1,6 +1,6 @@
 import UserModel from './user/model';
 import OtpModel from './otp/model';
-import { Transporter } from 'nodemailer';
+import { Transporter, createTransport } from 'nodemailer';
 import CountryModel from './country/model';
 import CityModel from './city/model';
 import RoleModel from './role/model';
@@ -31,6 +31,15 @@ export default class Context {
         this.country = new CountryModel(connection, this);
         this.permission = new PermissionModel(connection, this);
         this.rolePermission = new RolePermissionModel(connection, this);
+        this.transporter = createTransport({
+            host: process.env.SMTP_HOST,
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            }
+        })
     }
 
     static getInstance(connection: any, schema: any, req?: any, auth?: any) {

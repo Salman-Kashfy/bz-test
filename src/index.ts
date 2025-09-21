@@ -3,12 +3,14 @@ import cookieParser from 'cookie-parser'
 import {ApolloServer, Config, ExpressContext} from 'apollo-server-express';
 import schema from './shared/directives/loadSchema';
 import connection from "./database/connection";
-import { userLogin } from "./endpoints/user";
+import { userLogin, userLogout, refreshToken } from "./endpoints/user";
+import { createOtp, verifyOtp, invite, validateInvite, resetPassword } from "./endpoints/reset.password";
 import {basePath, disableAuthAccess, disableGraphqlIntrospection, getFakeAuth, NODE_ENV} from './shared/config'
 import { config }  from "dotenv"
 import Context from "./schema/context";
 import handleAuth from "./handleAuth";
 import bodyParser from 'body-parser';
+import {Auth} from './middleware/auth'
 import cors from 'cors'
 import https from 'https'
 import fs from 'fs'
@@ -67,11 +69,18 @@ declare module 'express' {
         /**
          * Application routes
          * */
-        app.get(`/${prefix}/health`, async (req:Request,res:Response) => {
+        app.get(`/${prefix}/health`, Auth,async (req:Request,res:Response) => {
             res.json({ message: 'Kudos!' })
             return
         })
         app.post(`/${prefix}/login`, userLogin)
+        app.post(`/${prefix}/logout`, userLogout)
+        app.post(`/${prefix}/refresh-token`, refreshToken)
+        app.post(`/${prefix}/create-otp`, createOtp)
+        app.post(`/${prefix}/verify-otp`, verifyOtp)
+        app.post(`/${prefix}/reset-password`, resetPassword)
+        app.post(`/${prefix}/invite`, invite)
+        app.get(`/${prefix}/validate-invite`, validateInvite)
 
         /**
          * Provide schema and resolvers to apollo server instance.

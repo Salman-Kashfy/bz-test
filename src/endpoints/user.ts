@@ -23,7 +23,7 @@ export const userLogin = async (req:Request, res:Response) => {
          * Fetch users along with its associations.
          * */
         const user:UserEntity | null = await connection.getRepository(UserEntity).findOne({
-            relations: ['roles', 'brands', 'brands.subscription', 'gyms', 'gyms.brand', 'gyms.brand.subscription'],
+            relations: ['role'],
             where: { email }
         })
         if(!user){
@@ -31,23 +31,6 @@ export const userLogin = async (req:Request, res:Response) => {
         }
         if(user.status !== Status.ACTIVE){
             return res.send({ status: false, message: 'Account deactivated.' })
-        }
-
-        /**
-         * Get subscription for roles below super-user
-         * Prevent login for roles below brand-user
-         * */
-        let subscription:any = null, currency, countryId
-        const role:any = user.role
-        if(role.name !== Roles.SUPER_ADMIN){
-            const country = await connection.getRepository(Country).findOneBy({id: user.countryId})
-            currency = {code: country!.currency!.code, symbol: country!.currency!.symbol}
-            countryId = country!.id
-            if(role.name !== Roles.ADMIN){
-                // if(subscription.status === SubscriptionStatus.EXPIRED){
-                //     return res.send({ status: false, message: 'Subscription expired. Time to renew!' })
-                // }
-            }
         }
 
         /**
@@ -63,13 +46,12 @@ export const userLogin = async (req:Request, res:Response) => {
          * */
         const key = (new ShortUniqueId({ length: 8 })).rnd()
         const payload = {
-            id:user.id,
+            uuid:user.uuid,
             firstName: user.firstName,
             middleName: user.middleName,
             lastName: user.lastName,
-            role: { id: role.id, name: role.name },
-            subscriptionStatus: subscription?.status || null,
-            currency, key, countryId
+            role: { uuid: user.role.uuid, name: user.role.name },
+            key, // country
         }
         const token = sign({id: user.id, key}, jwtConfig.jwtSecretKey ,{ expiresIn: jwtConfig.accessTokenTTL })
         const refreshToken = sign({id: user.id, key}, jwtConfig.jwtSecretKey ,{ expiresIn: jwtConfig.refreshTokenTTL })
