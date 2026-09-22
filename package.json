@@ -5,7 +5,8 @@
     "scripts": {
         "start": "node dist/index.js",
         "dev": "nodemon src/index.ts",
-        "build": "tsc -p ."
+        "build": "tsc -p .",
+        "test": "jest --runInBand"
     },
     "dependencies": {
         "@faker-js/faker": "^10.6.0",
@@ -27,11 +28,14 @@
     "devDependencies": {
         "@types/cors": "^2.8.17",
         "@types/express": "^4.17.21",
+        "@types/jest": "^30.0.0",
         "@types/lodash": "^4.14.202",
         "@types/node": "^20.10.3",
         "@types/node-cron": "^3.0.11",
         "@types/uuid": "^9.0.7",
+        "jest": "^30.5.2",
         "nodemon": "^3.0.2",
+        "ts-jest": "^29.4.12",
         "ts-node": "^10.9.1",
         "typescript": "^5.3.2"
     }
