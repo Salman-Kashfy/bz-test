@@ -11,5 +11,5 @@ dist
 .yarnrc.yml
 temp
 uploads
-.redis_hrm.conf
-.redis_data_hrm
+redis_hrm.conf
+redis_data_hrm

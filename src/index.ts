@@ -6,6 +6,7 @@ import { config } from 'dotenv';
 import connection from './database/connection';
 import createPingRouter from './endpoints/ping';
 import Context from "./schema/context";
+import { pingScheduler } from './scheduler/PingScheduler';
 
 /**
  * Setup application config and environment variables.
@@ -38,6 +39,7 @@ export const setupCtx = (connection: any) => {
 (async () => {
     await connection.initialize();
     setupCtx(connection);
+    pingScheduler();
 
     try {
         /**
