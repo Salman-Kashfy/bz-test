@@ -3,7 +3,6 @@ import PingModel from './ping/model';
 export default class Context {
     static instance: Context;
     ping: PingModel;
-    req: object;
 
     constructor(connection: any, req?: any) {
         this.ping = new PingModel(connection);
@@ -18,9 +17,5 @@ export default class Context {
 
     static setupCtx(connection: any) {
         return this.getInstance(connection);
-    }
-
-    setReq(req: any) {
-        this.req = req;
     }
 }
