@@ -30,14 +30,14 @@ app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200, credentials: t
 const port = process.env.NODE_PORT || 5000;
 const prefix = 'api';
 
-export const setupWithoutAuthContext = (connection: any) => {
-    return Context.setupWithoutAuthContext(connection);
+export const setupCtx = (connection: any) => {
+    return Context.setupCtx(connection);
 };
 
 
 (async () => {
     await connection.initialize();
-    setupWithoutAuthContext(connection);
+    setupCtx(connection);
 
     try {
         /**

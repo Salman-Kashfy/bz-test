@@ -16,7 +16,7 @@ export default class Context {
         return this.instance;
     }
 
-    static setupWithoutAuthContext(connection: any) {
+    static setupCtx(connection: any) {
         return this.getInstance(connection);
     }
 

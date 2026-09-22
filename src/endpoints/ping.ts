@@ -4,7 +4,7 @@ import Context from '../schema/context';
 
 export default function createPingRouter(connection: any) {
     const router = Router();
-    const ctx:Context = Context.setupWithoutAuthContext(connection);
+    const ctx:Context = Context.setupCtx(connection);
 
     /** GET /api/ping — list all active pings */
     router.get('/', async (req: Request, res: Response) => {
