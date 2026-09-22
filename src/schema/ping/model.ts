@@ -34,11 +34,14 @@ export default class PingModel extends BaseModel {
     }
 
     async getLatest() {
-        return this.repository.findOne({
+        const [latest] = await this.repository.find({
             order: {
                 createdAt: 'DESC',
             },
+            take: 1,
         });
+
+        return latest;
     }
 
     async send() {
