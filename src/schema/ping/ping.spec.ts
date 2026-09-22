@@ -9,7 +9,15 @@ jest.mock('@faker-js/faker', () => ({
     },
 }));
 
+jest.mock('../../database/redis', () => ({
+    __esModule: true,
+    default: {
+        publish: jest.fn().mockResolvedValue(undefined),
+    },
+}));
+
 import axios from 'axios';
+import RedisClient from '../../database/redis';
 import PingModel from './model';
 
 describe('PingModel', () => {
@@ -39,17 +47,22 @@ describe('PingModel', () => {
             }
         });
 
-        repository.save = jest.fn().mockResolvedValue({
+        const savedPing = {
             id: "ping-123",
             amznTraceId: "trace-xyz",
             responseTime: 250,
-            statusCode: 200
-        });
+            statusCode: 200,
+        };
+        repository.save = jest.fn().mockResolvedValue(savedPing);
 
         const result = await model.send();
 
         expect(axios.post).toHaveBeenCalled();
         expect(repository.save).toHaveBeenCalled();
+        expect(RedisClient.publish).toHaveBeenCalledWith(
+            'ping.created',
+            JSON.stringify(savedPing),
+        );
 
         expect(result.response.headers["X-Amzn-Trace-Id"])
             .toBe("trace-xyz");
