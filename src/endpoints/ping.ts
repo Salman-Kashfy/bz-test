@@ -8,7 +8,7 @@ export default function createPingRouter(connection: any) {
     router.get('/list', async (req: Request, res: Response) => {
         try {
             const page = Number(req.query.page || 1);
-            const limit = 2
+            const limit = 10
             const data = await ctx.ping.getAll(page, limit);
             res.json({ status: true, data });
         } catch (e: any) {

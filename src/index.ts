@@ -23,8 +23,7 @@ app.use(bodyParser.json());
  */
 const allowedOrigins = [
     'https://localhost',
-    'https://localhost:3000',
-    'http://localhost:3000',
+    'http://localhost:5173',
 ];
 app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200, credentials: true }));
 
