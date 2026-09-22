@@ -57,7 +57,13 @@ describe('PingModel', () => {
 
         const result = await model.send();
 
-        expect(axios.post).toHaveBeenCalled();
+        expect(axios.post).toHaveBeenCalledWith(
+            'https://httpbin.org/anything',
+            {
+                title: 'Mocked sentence',
+                author: 'Mock User',
+            },
+        );
         expect(repository.save).toHaveBeenCalled();
         expect(RedisClient.publish).toHaveBeenCalledWith(
             'ping.created',
