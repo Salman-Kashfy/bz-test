@@ -1,60 +1,26 @@
-import UserModel from './user/model';
-import OtpModel from './otp/model';
-import { Transporter, createTransport } from 'nodemailer';
-import CountryModel from './country/model';
-import CityModel from './city/model';
-import RoleModel from './role/model';
-import PermissionModel from './permission/model';
-import RolePermissionModel from './role-permission/model';
+import PingModel from './ping/model';
 
 export default class Context {
-    static instance:Context;
-    otp: OtpModel;
-    user: UserModel;
-    city: CityModel;
-    role: RoleModel;
-    userId: string;
-    schema: any;
-    country: CountryModel;
-    permission: PermissionModel;
-    rolePermission: RolePermissionModel;
+    static instance: Context;
+    ping: PingModel;
     req: object;
-    transporter:Transporter;
 
-    constructor(connection: any, schema: any, req?: any, user?: any) {
-        this.otp = new OtpModel(connection, this);
-        this.user = new UserModel(connection, this);
-        this.city = new CityModel(connection, this);
-        this.role = new RoleModel(connection, this);
-        this.userId = user ? user.id : null;
-        this.schema = schema;
-        this.country = new CountryModel(connection, this);
-        this.permission = new PermissionModel(connection, this);
-        this.rolePermission = new RolePermissionModel(connection, this);
-        this.transporter = createTransport({
-            host: process.env.SMTP_HOST,
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            }
-        })
+    constructor(connection: any, req?: any) {
+        this.ping = new PingModel(connection);
     }
 
-    static getInstance(connection: any, schema: any, req?: any, auth?: any) {
+    static getInstance(connection: any, req?: any) {
         if (!this.instance) {
-            this.instance = new Context(connection, schema, req, auth);
+            this.instance = new Context(connection, req);
         }
         return this.instance;
     }
 
-    setReq(req:any){
-        this.req = req
+    static setupWithoutAuthContext(connection: any) {
+        return this.getInstance(connection);
     }
 
-    setAuth(user:any){
-        this.user = user
-        this.userId = user.id
+    setReq(req: any) {
+        this.req = req;
     }
 }

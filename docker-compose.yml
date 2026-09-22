@@ -8,3 +8,18 @@ services:
         ports:
             - "127.0.0.1:6380:6379"
         restart: unless-stopped
+    postgres-db:
+        environment:
+            - POSTGRES_PASSWORD=bz_test
+            - POSTGRES_USER=bz_test
+            - POSTGRES_DB=bz_test
+        build:
+            context: .
+            dockerfile: Dockerfile.postgis
+        image: postgis/postgis
+        volumes:
+            #- ./postgres_data:/home/ubuntu/postgres_data  # Local directory
+            - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+        ports:
+            - '3003:5432'
+        restart: unless-stopped
