@@ -5,10 +5,20 @@ export default function createPingRouter(connection: any) {
     const router = Router();
     const ctx:Context = Context.setupCtx(connection);
 
-    /** GET /api/ping — list all active pings */
-    router.get('/test', async (req: Request, res: Response) => {
+    router.get('/list', async (req: Request, res: Response) => {
         try {
-            res.json({ status: true, name: ctx.ping.test() });
+            const page = Number(req.query.page || 1);
+            const limit = 2
+            const data = await ctx.ping.getAll(page, limit);
+            res.json({ status: true, data });
+        } catch (e: any) {
+            res.status(500).json({ status: false, message: e.message });
+        }
+    });
+
+    router.get('/send', async (req: Request, res: Response) => {
+        try {
+            res.json({ status: true, data: await ctx.ping.send() });
         } catch (e: any) {
             res.status(500).json({ status: false, message: e.message });
         }

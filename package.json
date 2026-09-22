@@ -8,6 +8,8 @@
         "build": "tsc -p ."
     },
     "dependencies": {
+        "@faker-js/faker": "^10.6.0",
+        "axios": "^1.20.0",
         "body-parser": "^1.20.2",
         "camelcase-keys": "^6.2.2",
         "cors": "^2.8.5",

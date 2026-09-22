@@ -12,6 +12,8 @@ export default class BaseModel {
         this.context = context;
     }
 
+    
+
     successResponse(data: any) {
         return { status: true, data };
     }
