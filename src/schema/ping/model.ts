@@ -2,6 +2,7 @@ import BaseModel from '../baseModel';
 import axios from 'axios';
 import { Ping as PingEntity } from '../../database/entity/Ping';
 import { faker } from "@faker-js/faker";
+import RedisClient from '../../database/redis';
 
 export default class PingModel extends BaseModel {
     constructor(connection: any, context?: any) {
@@ -32,6 +33,14 @@ export default class PingModel extends BaseModel {
         };
     }
 
+    async getLatest() {
+        return this.repository.findOne({
+            order: {
+                createdAt: 'DESC',
+            },
+        });
+    }
+
     async send() {
         const payload = {
             title: faker.lorem.sentence(),
@@ -42,12 +51,13 @@ export default class PingModel extends BaseModel {
         const response = await axios.post('https://httpbin.org/anything', payload);
         const responseTime = Date.now() - startedAt;
 
-        await this.repository.save({
+        const ping = await this.repository.save({
             amznTraceId: response.data.headers['X-Amzn-Trace-Id'],
             responseTime,
             statusCode: response.status,
             payload
         });
+        await RedisClient.publish('ping.created', JSON.stringify(ping));
 
         return {
             response: response.data,

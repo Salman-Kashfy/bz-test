@@ -12,21 +12,50 @@ const redis = {
 }
 
 class RedisClient {
-    static options = {
-        port: redis.connection.port, // Redis port
-        host: redis.connection.host, // Redis host
-        db: 0, // Defaults to 0
-        connectTimeout: 5000,
-        password: process.env.REDIS_PASSWORD
-    };
+    private static client: Redis | null = null;
+    private static subscriber: Redis | null = null;
+    private static listeners = new Map<string, Set<(message: string) => void>>();
 
-    static client = redis.enable ? new Redis(RedisClient.options) : null;
+    private static isEnabled() {
+        return process.env.REDIS_ENABLE === 'true' || Boolean(process.env.REDIS_URL);
+    }
+
+    private static createConnection() {
+        if (process.env.REDIS_URL) {
+            return new Redis(process.env.REDIS_URL);
+        }
+
+        return new Redis({
+            port: redis.connection.port,
+            host: redis.connection.host,
+            db: 0,
+            connectTimeout: 5000,
+            password: process.env.REDIS_PASSWORD,
+        });
+    }
+
+    private static getClient() {
+        if (!RedisClient.client) {
+            RedisClient.client = RedisClient.createConnection();
+        }
+        return RedisClient.client;
+    }
+
+    private static async getSubscriber() {
+        if (!RedisClient.subscriber) {
+            RedisClient.subscriber = RedisClient.getClient().duplicate();
+            RedisClient.subscriber.on('message', (channel, message) => {
+                RedisClient.listeners.get(channel)?.forEach((listener) => listener(message));
+            });
+        }
+        return RedisClient.subscriber;
+    }
 
     static async get(key: string, params:any = null) {
-        if (redis.enable) {
+        if (RedisClient.isEnabled()) {
             let res: any;
             try {
-                res = await RedisClient.client?.get(key);
+            res = await RedisClient.getClient().get(key);
             } catch (error) {
                 console.log('Error getting the cache', error);
                 return null;
@@ -40,9 +69,9 @@ class RedisClient {
     }
 
     static async set(key: string, value: any, params: any) {
-        if (redis.enable) {
+        if (RedisClient.isEnabled()) {
             try {
-                await RedisClient.client?.set(
+            await RedisClient.getClient().set(
                     key,
                     value,
                     'EX',
@@ -55,10 +84,10 @@ class RedisClient {
     }
 
     static async delete(key: string) {
-        if (redis.enable) {
+        if (RedisClient.isEnabled()) {
             let res: any;
             try {
-                res = await RedisClient.client?.del(key);
+            res = await RedisClient.getClient().del(key);
             } catch (error) {
                 console.log('Error deleting the cache', error);
                 return null;
@@ -66,6 +95,42 @@ class RedisClient {
             return res;
         }
         return null;
+    }
+
+    static async publish(channel: string, message: string) {
+        if (!RedisClient.isEnabled()) {
+            return;
+        }
+
+        try {
+            await RedisClient.getClient().publish(channel, message);
+        } catch (error) {
+            console.log('Error publishing Redis message', error);
+        }
+    }
+
+    static async subscribe(channel: string, listener: (message: string) => void) {
+        if (!RedisClient.isEnabled()) {
+            return () => undefined;
+        }
+
+        const subscriber = await RedisClient.getSubscriber();
+        let channelListeners = RedisClient.listeners.get(channel);
+        if (!channelListeners) {
+            channelListeners = new Set();
+            RedisClient.listeners.set(channel, channelListeners);
+            await subscriber.subscribe(channel);
+        }
+        channelListeners.add(listener);
+
+        return async () => {
+            const listeners = RedisClient.listeners.get(channel);
+            listeners?.delete(listener);
+            if (listeners?.size === 0) {
+                RedisClient.listeners.delete(channel);
+                await subscriber.unsubscribe(channel);
+            }
+        };
     }
 }
 
