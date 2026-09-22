@@ -10,4 +10,8 @@ export default class PingModel extends BaseModel {
     test() {
         return 'test ping model'
     }
+
+    send() {
+        console.log('ping from model');
+    }
 }
