@@ -55,6 +55,35 @@ describe('PingModel', () => {
             .toBe("trace-xyz");
     });
 
+    it("should return paginated pings", async () => {
+        const model = new PingModel(connection as any);
+        const pings = [
+            { id: "ping-1" },
+            { id: "ping-2" },
+        ];
+
+        repository.findAndCount.mockResolvedValue([pings, 5]);
+
+        const result = await model.getAll(2, 2);
+
+        expect(repository.findAndCount).toHaveBeenCalledWith({
+            order: {
+                createdAt: 'DESC',
+            },
+            skip: 2,
+            take: 2,
+        });
+        expect(result).toEqual({
+            data: pings,
+            pagination: {
+                page: 2,
+                limit: 2,
+                total: 5,
+                totalPages: 3,
+            },
+        });
+    });
+
     it("should return the latest ping", async () => {
         const model = new PingModel(connection as any);
         const latestPing = {
