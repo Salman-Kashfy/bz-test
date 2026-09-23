@@ -160,22 +160,22 @@ describe('PingModel', () => {
 
         repository.findAndCount.mockResolvedValue([pings, 5]);
 
-        const result = await model.getAll(2, 2);
+        const result = await model.getAll(2);
 
         expect(repository.findAndCount).toHaveBeenCalledWith({
             order: {
                 createdAt: 'DESC',
             },
-            skip: 2,
-            take: 2,
+            skip: 10,
+            take: 10,
         });
         expect(result).toEqual({
             data: pings,
             pagination: {
                 page: 2,
-                limit: 2,
+                limit: 10,
                 total: 5,
-                totalPages: 3,
+                totalPages: 1,
             },
         });
     });
