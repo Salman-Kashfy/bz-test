@@ -70,6 +70,7 @@ describe('PingModel', () => {
             mean: '250',
             stddev: null,
         }]);
+        repository.find.mockResolvedValue([]);
 
         const result = await model.send();
 
@@ -84,6 +85,9 @@ describe('PingModel', () => {
             amznTraceId: 'trace-xyz',
             responseTime: 250,
             statusCode: 200,
+            fResponseTime: 250,
+            zScore: 0,
+            isAnomaly: false,
             payload: {
                 title: 'Mocked sentence',
                 author: 'Mock User',
@@ -162,6 +166,20 @@ describe('PingModel', () => {
             "WHERE created_at >= NOW() - INTERVAL '1 hour'",
         ));
         expect(result).toEqual(statistics);
+    });
+
+    it("should return the current response time as the first forecast", async () => {
+        const model = new PingModel(connection as any);
+        repository.find.mockResolvedValue([]);
+
+        await expect(model.nextForecast(100)).resolves.toBe(100);
+    });
+
+    it("should calculate the next forecast from the previous forecast", async () => {
+        const model = new PingModel(connection as any);
+        repository.find.mockResolvedValue([{ fResponseTime: 80 }]);
+
+        await expect(model.nextForecast(100)).resolves.toBe(86);
     });
 
     it("should return the latest ping", async () => {

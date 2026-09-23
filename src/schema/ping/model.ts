@@ -58,14 +58,18 @@ export default class PingModel extends BaseModel {
         
         const {mean, stddev} = await this.calcStdDev();
         const zScore = stddev > 0 ? (responseTime - mean) / stddev : 0;
-        const isAnomaly = Math.abs(zScore) > 0.5; // or your chosen threshold
-        console.log({mean, stddev, zScore, isAnomaly})
+        const isAnomaly = zScore > 0.5; // or your chosen threshold
+        const forecast = await this.nextForecast(responseTime);
+
+        console.log({mean, stddev, zScore, isAnomaly, responseTime, forecast})
 
         const ping = await this.repository.save({
             amznTraceId: response.data.headers['X-Amzn-Trace-Id'],
             responseTime,
             statusCode: response.status,
-            zScore, isAnomaly,
+            fResponseTime: forecast,
+            zScore,
+            isAnomaly,
             payload
         });
         
@@ -87,8 +91,16 @@ export default class PingModel extends BaseModel {
             WHERE created_at >= NOW() - INTERVAL '1 hour';
         `);
 
-        //console.log(statistics);
-
         return statistics;
+    }
+
+    async nextForecast(currentResponseTime: number) {
+        const alpha = 0.3;
+        const latest = await this.getLatest();
+
+        // Use the previous forecast as the baseline for the next prediction.
+        const prevForecast = latest?.fResponseTime ?? currentResponseTime;
+
+        return alpha * currentResponseTime + (1 - alpha) * prevForecast;
     }
 }

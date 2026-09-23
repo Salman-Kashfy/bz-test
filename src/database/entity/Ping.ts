@@ -12,6 +12,9 @@ export class Ping extends BaseEntity {
     @Column({ type: 'integer', name: 'response_time' })
     responseTime!: number;
 
+    @Column({ type: 'numeric', precision: 10, scale: 2, name: 'f_response_time', nullable: true })
+    fResponseTime!: number;
+
     @Column({ type: 'numeric', precision: 10, scale: 2, nullable: true, name: 'z_score' })
     zScore!: number;
 
