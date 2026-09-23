@@ -32,6 +32,7 @@ describe('PingModel', () => {
         findAndCount: jest.fn(),
         find: jest.fn(),
         save: jest.fn(),
+        query: jest.fn(),
     };
 
     const connection = {
@@ -65,6 +66,10 @@ describe('PingModel', () => {
             statusCode: 200,
         };
         repository.save = jest.fn().mockResolvedValue(savedPing);
+        repository.query = jest.fn().mockResolvedValue([{
+            mean: '250',
+            stddev: null,
+        }]);
 
         const result = await model.send();
 
@@ -84,6 +89,9 @@ describe('PingModel', () => {
                 author: 'Mock User',
             },
         });
+        expect(repository.query).toHaveBeenCalledWith(expect.stringContaining(
+            "STDDEV_SAMP(response_time)",
+        ));
         expect(RedisClient.publish).toHaveBeenCalledWith(
             'ping.created',
             JSON.stringify(savedPing),
@@ -134,6 +142,26 @@ describe('PingModel', () => {
                 totalPages: 3,
             },
         });
+    });
+
+    it("should calculate the response-time mean and standard deviation for the last hour", async () => {
+        const model = new PingModel(connection as any);
+        const statistics = { mean: '250', stddev: '25' };
+
+        repository.query.mockResolvedValue([statistics]);
+
+        const result = await model.calcStdDev();
+
+        expect(repository.query).toHaveBeenCalledWith(expect.stringContaining(
+            "SELECT AVG(response_time) AS mean, STDDEV_SAMP(response_time) AS stddev",
+        ));
+        expect(repository.query).toHaveBeenCalledWith(expect.stringContaining(
+            "FROM pings",
+        ));
+        expect(repository.query).toHaveBeenCalledWith(expect.stringContaining(
+            "WHERE created_at >= NOW() - INTERVAL '1 hour'",
+        ));
+        expect(result).toEqual(statistics);
     });
 
     it("should return the latest ping", async () => {

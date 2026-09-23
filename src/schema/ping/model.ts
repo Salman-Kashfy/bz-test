@@ -55,18 +55,40 @@ export default class PingModel extends BaseModel {
         }
         
         const responseTime = Date.now() - startedAt;
+        
+        const {mean, stddev} = await this.calcStdDev();
+        const zScore = stddev > 0 ? (responseTime - mean) / stddev : 0;
+        const isAnomaly = Math.abs(zScore) > 0.5; // or your chosen threshold
+        console.log({mean, stddev, zScore, isAnomaly})
 
         const ping = await this.repository.save({
             amznTraceId: response.data.headers['X-Amzn-Trace-Id'],
             responseTime,
             statusCode: response.status,
+            zScore, isAnomaly,
             payload
         });
+        
         await RedisClient.publish('ping.created', JSON.stringify(ping));
 
         return {
             response: response.data,
             responseTime,
         };
+    }
+
+    /* 
+        Calculate Rolling Stats(Mean and sample standard deviation)
+    */
+    async calcStdDev(){
+        const [statistics] = await this.repository.query(`
+            SELECT AVG(response_time) AS mean, STDDEV_SAMP(response_time) AS stddev
+            FROM pings
+            WHERE created_at >= NOW() - INTERVAL '1 hour';
+        `);
+
+        //console.log(statistics);
+
+        return statistics;
     }
 }
