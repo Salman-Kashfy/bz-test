@@ -16,6 +16,13 @@ jest.mock('../../database/redis', () => ({
     },
 }));
 
+jest.mock('axios', () => ({
+    __esModule: true,
+    default: {
+        post: jest.fn(),
+    },
+}));
+
 import axios from 'axios';
 import RedisClient from '../../database/redis';
 import PingModel from './model';
@@ -33,6 +40,7 @@ describe('PingModel', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        axios.post = jest.fn();
     });
 
     it("should send a ping and save the result", async () => {
@@ -72,6 +80,18 @@ describe('PingModel', () => {
 
         expect(result.response.headers["X-Amzn-Trace-Id"])
             .toBe("trace-xyz");
+    });
+
+    it("should propagate an axios failure without saving or publishing", async () => {
+        const model = new PingModel(connection as any);
+        const requestError = new Error("HTTP request failed");
+
+        (axios.post as jest.Mock).mockRejectedValue(requestError);
+
+        await expect(model.send()).rejects.toBe(requestError);
+
+        expect(repository.save).not.toHaveBeenCalled();
+        expect(RedisClient.publish).not.toHaveBeenCalled();
     });
 
     it("should return paginated pings", async () => {
