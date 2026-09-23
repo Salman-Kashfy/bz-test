@@ -45,6 +45,9 @@ describe('PingModel', () => {
 
     it("should send a ping and save the result", async () => {
         const model = new PingModel(connection as any);
+        const dateNowSpy = jest.spyOn(Date, 'now')
+            .mockReturnValueOnce(1000)
+            .mockReturnValueOnce(1250);
 
         axios.post = jest.fn().mockResolvedValue({
             status: 200,
@@ -72,7 +75,15 @@ describe('PingModel', () => {
                 author: 'Mock User',
             },
         );
-        expect(repository.save).toHaveBeenCalled();
+        expect(repository.save).toHaveBeenCalledWith({
+            amznTraceId: 'trace-xyz',
+            responseTime: 250,
+            statusCode: 200,
+            payload: {
+                title: 'Mocked sentence',
+                author: 'Mock User',
+            },
+        });
         expect(RedisClient.publish).toHaveBeenCalledWith(
             'ping.created',
             JSON.stringify(savedPing),
@@ -80,6 +91,8 @@ describe('PingModel', () => {
 
         expect(result.response.headers["X-Amzn-Trace-Id"])
             .toBe("trace-xyz");
+
+        dateNowSpy.mockRestore();
     });
 
     it("should propagate an axios failure without saving or publishing", async () => {
@@ -135,5 +148,13 @@ describe('PingModel', () => {
         const result = await model.getLatest();
 
         expect(result).toBe(latestPing);
+    });
+
+    // getLatest() empty case
+    it("should return undefined when no pings exist", async () => {
+        const model = new PingModel(connection as any);
+        repository.find.mockResolvedValue([]);
+        const result = await model.getLatest();
+        expect(result).toBeUndefined();
     });
 });
