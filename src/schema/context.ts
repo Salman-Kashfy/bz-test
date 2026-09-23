@@ -6,14 +6,14 @@ export default class Context {
     ping: PingModel;
     redis: RedisClient;
 
-    constructor(connection: any, req?: any) {
+    constructor(connection: any) {
         this.ping = new PingModel(connection);
         this.redis = RedisClient;
     }
 
-    static getInstance(connection: any, req?: any) {
+    static getInstance(connection: any) {
         if (!this.instance) {
-            this.instance = new Context(connection, req);
+            this.instance = new Context(connection);
         }
         return this.instance;
     }

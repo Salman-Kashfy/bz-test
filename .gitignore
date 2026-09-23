@@ -13,3 +13,4 @@ temp
 uploads
 redis_hrm.conf
 redis_data_hrm
+coverage

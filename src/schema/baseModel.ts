@@ -1,6 +1,3 @@
-import { forEach, snakeCase, map, find, isArray } from 'lodash';
-import { In } from 'typeorm';
-
 export default class BaseModel {
     repository: any;
     connection: any;
@@ -11,8 +8,6 @@ export default class BaseModel {
         this.repository = repository;
         this.context = context;
     }
-
-    
 
     successResponse(data: any) {
         return { status: true, data };
