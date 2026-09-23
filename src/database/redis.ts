@@ -15,6 +15,7 @@ class RedisClient {
     private static client: Redis | null = null;
     private static subscriber: Redis | null = null;
     private static listeners = new Map<string, Set<(message: string) => void>>();
+    private static redisSuffix = 'bz'
 
     private static isEnabled() {
         return process.env.REDIS_ENABLE === 'true' || Boolean(process.env.REDIS_URL);
@@ -55,7 +56,7 @@ class RedisClient {
         if (RedisClient.isEnabled()) {
             let res: any;
             try {
-            res = await RedisClient.getClient().get(key);
+            res = await RedisClient.getClient().get(key + `:${RedisClient.redisSuffix}`);
             } catch (error) {
                 console.log('Error getting the cache', error);
                 return null;
@@ -72,7 +73,7 @@ class RedisClient {
         if (RedisClient.isEnabled()) {
             try {
             await RedisClient.getClient().set(
-                    key,
+                    key + `:${RedisClient.redisSuffix}`,
                     value,
                     'EX',
                     params?.ex ? params.ex : redis.defaultShortExpiryTimeInSec
@@ -87,7 +88,7 @@ class RedisClient {
         if (RedisClient.isEnabled()) {
             let res: any;
             try {
-            res = await RedisClient.getClient().del(key);
+            res = await RedisClient.getClient().del(key + `:${RedisClient.redisSuffix}`);
             } catch (error) {
                 console.log('Error deleting the cache', error);
                 return null;
