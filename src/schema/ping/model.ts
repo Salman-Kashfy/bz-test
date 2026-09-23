@@ -58,7 +58,7 @@ export default class PingModel extends BaseModel {
         
         const {mean, stddev} = await this.calcStdDev();
         const zScore = stddev > 0 ? (responseTime - mean) / stddev : 0;
-        const isAnomaly = zScore > 0.5; // or your chosen threshold
+        const isAnomaly = zScore > 1; // or your chosen threshold
         const forecast = await this.nextForecast(responseTime);
 
         console.log({mean, stddev, zScore, isAnomaly, responseTime, forecast})
