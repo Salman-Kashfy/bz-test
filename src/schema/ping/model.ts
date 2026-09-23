@@ -52,26 +52,24 @@ export default class PingModel extends BaseModel {
 
         const startedAt = Date.now();
         let response;
-        try{
+        try {
             response = await axios.post('https://httpbin.org/anything', payload);
-        }catch(error){
-            if (axios.isAxiosError(error)) {
-                response = error.response;
-            }
+        } catch (error) {
+            throw error;
         }
         
         const responseTime = Date.now() - startedAt;
 
         const ping = await this.repository.save({
-            amznTraceId: response?.data?.headers?.['X-Amzn-Trace-Id'] ?? null,
+            amznTraceId: response.data.headers['X-Amzn-Trace-Id'],
             responseTime,
-            statusCode: response?.status,
+            statusCode: response.status,
             payload
         });
         await RedisClient.publish('ping.created', JSON.stringify(ping));
 
         return {
-            response: response?.data ?? {},
+            response: response.data,
             responseTime,
         };
     }
