@@ -9,10 +9,6 @@ export default class PingModel extends BaseModel {
         super(connection, connection.getRepository(PingEntity), context);
     }
 
-    test() {
-        return 'test ping model'
-    }
-
     async getAll(page = 1, limit = 10) {
         const [data, total] = await this.repository.findAndCount({
             order: {

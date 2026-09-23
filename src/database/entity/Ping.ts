@@ -26,7 +26,6 @@ export class Ping extends BaseEntity {
 
     @CreateDateColumn({
         type: 'timestamptz',
-        default: () => 'CURRENT_TIMESTAMP(6)',
         name: 'created_at',
     })
     createdAt!: Date;
