@@ -107,6 +107,38 @@ describe('PingModel', () => {
         dateNowSpy.mockRestore();
     });
 
+    it("should calculate a z-score when standard deviation is positive", async () => {
+        const model = new PingModel(connection as any);
+        const dateNowSpy = jest.spyOn(Date, 'now')
+            .mockReturnValueOnce(1000)
+            .mockReturnValueOnce(1250);
+
+        axios.post = jest.fn().mockResolvedValue({
+            status: 200,
+            data: {
+                headers: {
+                    "X-Amzn-Trace-Id": "trace-z-score"
+                }
+            }
+        });
+        repository.save = jest.fn().mockResolvedValue({});
+        repository.query = jest.fn().mockResolvedValue([{
+            mean: '200',
+            stddev: 50,
+        }]);
+        repository.find.mockResolvedValue([]);
+
+        await model.send();
+
+        expect(repository.save).toHaveBeenCalledWith(expect.objectContaining({
+            responseTime: 250,
+            zScore: 1,
+            isAnomaly: false,
+        }));
+
+        dateNowSpy.mockRestore();
+    });
+
     it("should propagate an axios failure without saving or publishing", async () => {
         const model = new PingModel(connection as any);
         const requestError = new Error("HTTP request failed");
