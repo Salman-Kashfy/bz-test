@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import path from 'path';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -31,6 +32,8 @@ app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200, credentials: t
 
 const port = process.env.NODE_PORT || 5000;
 const prefix = 'api';
+
+app.use('/coverage', express.static(path.join(process.cwd(), 'coverage', 'lcov-report')));
 
 export const setupCtx = (connection: any) => {
     return Context.setupCtx(connection);

@@ -61,6 +61,7 @@ jobs:
             cd /home/ubuntu/apps/bizscout/backend
             git pull origin master
             npm i
+            npm run test:coverage
             npm run build
             pm2 restart bizscout --update-env
           '
