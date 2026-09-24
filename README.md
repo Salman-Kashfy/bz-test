@@ -1,13 +1,13 @@
 # Overview
 
-A lightweight monitoring service that periodically executes HTTP requests, stores the results, and streams updates to clients in near real time.
+A lightweight monitoring service that periodically executes HTTP requests, stores the results, and streams updates to clients in real time.
 
 # Installation
 
-Take a fresh pull of the repository and in the directory, run the CLI commands given below:
+Take a fresh pull of the repository, run the CLI commands given below:
 
 `npm i` - Install the npm dependencies\
-`docker-compose up -d` - Install Docker images of PostgreSQL and Redis
+`docker-compose up -d` - Install Docker images of PostgreSQL and Redis\
 `npm run dev` — start the app in development mode
 
 #### Additional Scripts:
@@ -57,7 +57,7 @@ Cloud Server: AWS\
 ORM: TypeORM\
 Git:  GitHub / Github Actions
 
-For BE, we chose for node.js, its a great choice for handling real-time events.
+For BE, we chose node.js, its a great choice for handling real-time events.
 
 For FE, we chose React.js, its best for small to mediem size projects.
 
@@ -118,7 +118,7 @@ We chose SSE. The reasons are as follows:
 
 1. setTimeout is inaccurate, constantly ping the server to check for updates. This brings redundancy.
 
-2. Websockets is a good choice, it keeps connection alive from both ends client and server where communication can happen both ways. This also brings redundancy as we need require only one way commuinication which is from server to client.
+2. Websockets is a good choice, it keeps connection alive for both ends i.e client and server where communication can happen both ways. This also brings redundancy as we require only one way commuinication which is from server to client.
 
 3. Server side events is a solid choice for this. Supports one way communication, clients are subscribed to an endpoint and the connection is kept alive. On other end, server publishes event on that endpoint. Client keeps receiving updates until its connection is closed.
 
@@ -175,7 +175,7 @@ We have kept a sensitive threshold value `1`, Usually a threshold value of 2 is 
 
 To predict the next response time, we need the following data:
 
-`prevResponseTime` - A most recent response time
+`prevResponseTime` - A most recent response time\
 `currentResponseTime` - Current response time during forecast cycle.
 
 #### Formula:
@@ -196,7 +196,6 @@ Every calculation we have made are displayed real-time i.e zScore, anomaly and f
 # Future improvements
 
 - We can use graphs, pie or bar charts to further plot the response time, z-score and prediction errors.
-
 - 24-hour window in addition to 1-hour
 
 
